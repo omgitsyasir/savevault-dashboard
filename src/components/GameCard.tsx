@@ -1,14 +1,23 @@
-import { Gamepad2 } from "lucide-react";
+import { Gamepad2, Laptop } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface Props {
   game: Tables<"games">;
   saveCount: number;
+  latestDeviceName?: string | null;
+  latestIsCurrent?: boolean;
   selected: boolean;
   onClick: () => void;
 }
 
-export const GameCard = ({ game, saveCount, selected, onClick }: Props) => {
+export const GameCard = ({
+  game,
+  saveCount,
+  latestDeviceName,
+  latestIsCurrent,
+  selected,
+  onClick,
+}: Props) => {
   return (
     <button
       onClick={onClick}
@@ -32,6 +41,21 @@ export const GameCard = ({ game, saveCount, selected, onClick }: Props) => {
           </div>
         )}
       </div>
+
+      {latestDeviceName && (
+        <div
+          className={`absolute left-2 top-2 flex max-w-[calc(100%-1rem)] items-center gap-1 rounded-full px-2 py-1 text-[10px] font-mono backdrop-blur-md ${
+            latestIsCurrent
+              ? "bg-primary/85 text-primary-foreground shadow-glow"
+              : "bg-background/70 text-foreground border border-border/60"
+          }`}
+          title={`Most recent save · ${latestDeviceName}`}
+        >
+          <Laptop className="h-3 w-3 shrink-0" />
+          <span className="truncate">{latestDeviceName}</span>
+        </div>
+      )}
+
       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background via-background/80 to-transparent p-3">
         <p className="font-display text-sm font-semibold leading-tight line-clamp-2">
           {game.name}
