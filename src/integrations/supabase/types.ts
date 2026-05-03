@@ -17,18 +17,21 @@ export type Database = {
       devices: {
         Row: {
           created_at: string
+          hardware_id: string | null
           id: string
           name: string
           os: string
         }
         Insert: {
           created_at?: string
+          hardware_id?: string | null
           id?: string
           name: string
           os: string
         }
         Update: {
           created_at?: string
+          hardware_id?: string | null
           id?: string
           name?: string
           os?: string

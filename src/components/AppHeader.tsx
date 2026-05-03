@@ -1,5 +1,6 @@
-import { Vault, Activity } from "lucide-react";
+import { Vault, Activity, Cpu, Library } from "lucide-react";
 import { useEffect, useState } from "react";
+import { NavLink } from "react-router-dom";
 import { getStatus, type SyncthingStatus } from "@/lib/syncthing";
 
 export const AppHeader = () => {
@@ -27,6 +28,29 @@ export const AppHeader = () => {
             </p>
           </div>
         </div>
+
+        <nav className="hidden items-center gap-1 rounded-full glass px-1.5 py-1 text-xs sm:flex">
+          {[
+            { to: "/", label: "Library", icon: Library },
+            { to: "/devices", label: "Devices", icon: Cpu },
+          ].map(({ to, label, icon: Icon }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end
+              className={({ isActive }) =>
+                `inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 transition-colors ${
+                  isActive
+                    ? "bg-primary/15 text-primary"
+                    : "text-muted-foreground hover:text-foreground"
+                }`
+              }
+            >
+              <Icon className="h-3.5 w-3.5" />
+              {label}
+            </NavLink>
+          ))}
+        </nav>
 
         <div className="flex items-center gap-2 rounded-full glass px-3 py-1.5 text-xs font-mono">
           <Activity
