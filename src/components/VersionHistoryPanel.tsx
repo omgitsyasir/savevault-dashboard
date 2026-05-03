@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { History, RotateCcw, HardDrive, Plus, Loader2, X, Hash } from "lucide-react";
+import { History, RotateCcw, HardDrive, Plus, Loader2, X, Hash, FolderTree } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -13,14 +13,17 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { toast } from "@/hooks/use-toast";
 import { triggerRestore } from "@/lib/syncthing";
+import type { SyncthingFolderStatus } from "@/lib/syncthing";
 
 type Save = Tables<"saves">;
 type Device = Tables<"devices">;
 
 interface Props {
-  game: Tables<"games"> | null;
+  game: (Tables<"games"> & { syncthing_folder_id?: string | null }) | null;
   devices: Device[];
   currentDeviceId?: string | null;
+  syncFolders?: SyncthingFolderStatus[];
+  onLinkFolder?: (folderId: string | null) => Promise<void> | void;
   onClose: () => void;
   onSavesChange: () => void;
 }
@@ -32,6 +35,8 @@ export const VersionHistoryPanel = ({
   game,
   devices,
   currentDeviceId,
+  syncFolders = [],
+  onLinkFolder,
   onClose,
   onSavesChange,
 }: Props) => {
@@ -121,6 +126,35 @@ export const VersionHistoryPanel = ({
       </header>
 
       <div className="border-b border-border/60 p-4 space-y-3">
+        {onLinkFolder && (
+          <div className="space-y-1.5">
+            <label className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+              <FolderTree className="h-3 w-3" /> Syncthing Folder
+            </label>
+            <Select
+              value={game.syncthing_folder_id ?? "__none"}
+              onValueChange={(v) => onLinkFolder(v === "__none" ? null : v)}
+            >
+              <SelectTrigger className="bg-muted/40 border-border/60">
+                <SelectValue placeholder="Not linked" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none">— Not linked —</SelectItem>
+                {syncFolders.length === 0 && (
+                  <div className="px-3 py-2 text-xs text-muted-foreground">
+                    No folders. Configure Syncthing in Settings.
+                  </div>
+                )}
+                {syncFolders.map((f) => (
+                  <SelectItem key={f.id} value={f.id}>
+                    {f.label} · {f.state}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
         <Select value={deviceId} onValueChange={setDeviceId}>
           <SelectTrigger className="bg-muted/40 border-border/60">
             <SelectValue placeholder="Source device (optional)" />
