@@ -1,15 +1,9 @@
-import { Vault, Activity, Cpu, Library } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Vault, Activity, Cpu, Library, Settings as SettingsIcon } from "lucide-react";
 import { NavLink } from "react-router-dom";
-import { getStatus, type SyncthingStatus } from "@/lib/syncthing";
+import { useSyncthing } from "@/hooks/useSyncthing";
 
 export const AppHeader = () => {
-  const [status, setStatus] = useState<SyncthingStatus | null>(null);
-
-  useEffect(() => {
-    getStatus().then(setStatus).catch(() => setStatus(null));
-  }, []);
-
+  const { status } = useSyncthing();
   const connected = status?.connected ?? false;
 
   return (
@@ -33,6 +27,7 @@ export const AppHeader = () => {
           {[
             { to: "/", label: "Library", icon: Library },
             { to: "/devices", label: "Devices", icon: Cpu },
+            { to: "/settings", label: "Settings", icon: SettingsIcon },
           ].map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}
@@ -52,7 +47,10 @@ export const AppHeader = () => {
           ))}
         </nav>
 
-        <div className="flex items-center gap-2 rounded-full glass px-3 py-1.5 text-xs font-mono">
+        <NavLink
+          to="/settings"
+          className="flex items-center gap-2 rounded-full glass px-3 py-1.5 text-xs font-mono hover:border-primary/40 transition-colors"
+        >
           <Activity
             className={`h-3.5 w-3.5 ${connected ? "text-primary" : "text-muted-foreground"}`}
           />
@@ -65,7 +63,7 @@ export const AppHeader = () => {
           <span className={connected ? "text-primary" : "text-muted-foreground"}>
             {connected ? "online" : "offline"}
           </span>
-        </div>
+        </NavLink>
       </div>
     </header>
   );
