@@ -2,7 +2,7 @@
 FROM node:22-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 COPY . .
 # Replace with your actual Supabase URL/Key if you have them
 ENV VITE_SUPABASE_URL=your_url
