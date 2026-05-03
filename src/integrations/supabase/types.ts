@@ -14,7 +14,114 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      devices: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          os: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          os: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          os?: string
+        }
+        Relationships: []
+      }
+      games: {
+        Row: {
+          cover_url: string | null
+          created_at: string
+          id: string
+          igdb_id: number | null
+          name: string
+          platforms: string[] | null
+          release_date: string | null
+          summary: string | null
+        }
+        Insert: {
+          cover_url?: string | null
+          created_at?: string
+          id?: string
+          igdb_id?: number | null
+          name: string
+          platforms?: string[] | null
+          release_date?: string | null
+          summary?: string | null
+        }
+        Update: {
+          cover_url?: string | null
+          created_at?: string
+          id?: string
+          igdb_id?: number | null
+          name?: string
+          platforms?: string[] | null
+          release_date?: string | null
+          summary?: string | null
+        }
+        Relationships: []
+      }
+      saves: {
+        Row: {
+          created_at: string
+          device_id: string | null
+          file_hash: string
+          game_id: string
+          id: string
+          notes: string | null
+          restore_requested: boolean
+          restored_at: string | null
+          size_bytes: number | null
+          version_number: number
+        }
+        Insert: {
+          created_at?: string
+          device_id?: string | null
+          file_hash: string
+          game_id: string
+          id?: string
+          notes?: string | null
+          restore_requested?: boolean
+          restored_at?: string | null
+          size_bytes?: number | null
+          version_number?: number
+        }
+        Update: {
+          created_at?: string
+          device_id?: string | null
+          file_hash?: string
+          game_id?: string
+          id?: string
+          notes?: string | null
+          restore_requested?: boolean
+          restored_at?: string | null
+          size_bytes?: number | null
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saves_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saves_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
