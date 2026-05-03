@@ -1,23 +1,48 @@
-import { Gamepad2, Laptop } from "lucide-react";
+import { Gamepad2, Laptop, RefreshCw, Check, AlertTriangle, CircleDashed } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
+import type { SyncthingFolderStatus } from "@/lib/syncthing";
 
 interface Props {
   game: Tables<"games">;
   saveCount: number;
   latestDeviceName?: string | null;
   latestIsCurrent?: boolean;
+  syncStatus?: SyncthingFolderStatus | null;
   selected: boolean;
   onClick: () => void;
 }
+
+const SYNC_STYLE = {
+  idle: { icon: Check, label: "synced", className: "bg-primary/85 text-primary-foreground" },
+  syncing: {
+    icon: RefreshCw,
+    label: "syncing",
+    className: "bg-secondary/85 text-secondary-foreground animate-pulse",
+  },
+  scanning: {
+    icon: RefreshCw,
+    label: "scanning",
+    className: "bg-secondary/70 text-secondary-foreground animate-pulse",
+  },
+  error: { icon: AlertTriangle, label: "error", className: "bg-destructive/90 text-destructive-foreground" },
+  unknown: {
+    icon: CircleDashed,
+    label: "unknown",
+    className: "bg-background/70 text-muted-foreground border border-border/60",
+  },
+} as const;
 
 export const GameCard = ({
   game,
   saveCount,
   latestDeviceName,
   latestIsCurrent,
+  syncStatus,
   selected,
   onClick,
 }: Props) => {
+  const sync = syncStatus ? SYNC_STYLE[syncStatus.state] : null;
+  const SyncIcon = sync?.icon;
   return (
     <button
       onClick={onClick}
@@ -53,6 +78,16 @@ export const GameCard = ({
         >
           <Laptop className="h-3 w-3 shrink-0" />
           <span className="truncate">{latestDeviceName}</span>
+        </div>
+      )}
+
+      {sync && SyncIcon && (
+        <div
+          className={`absolute right-2 top-2 flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-mono backdrop-blur-md ${sync.className}`}
+          title={`Syncthing · ${syncStatus?.label} · ${sync.label}`}
+        >
+          <SyncIcon className={`h-3 w-3 ${sync.label === "syncing" ? "animate-spin" : ""}`} />
+          <span>{sync.label}</span>
         </div>
       )}
 
