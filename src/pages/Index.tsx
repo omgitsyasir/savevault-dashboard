@@ -8,6 +8,8 @@ import { GameSearchDialog } from "@/components/GameSearchDialog";
 import { VersionHistoryPanel } from "@/components/VersionHistoryPanel";
 import { DevicesPanel } from "@/components/DevicesPanel";
 import { Button } from "@/components/ui/button";
+import { useCurrentDevice } from "@/hooks/useCurrentDevice";
+import { RegisterDeviceDialog } from "@/components/RegisterDeviceDialog";
 
 type Game = Tables<"games">;
 type Device = Tables<"devices">;
@@ -16,7 +18,10 @@ const Index = () => {
   const [games, setGames] = useState<Game[]>([]);
   const [devices, setDevices] = useState<Device[]>([]);
   const [counts, setCounts] = useState<Record<string, number>>({});
+  const [latestByGame, setLatestByGame] = useState<Record<string, string | null>>({});
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const { device: currentDevice, needsRegistration, register, dismiss } =
+    useCurrentDevice();
 
   const loadGames = async () => {
     const { data } = await supabase
@@ -35,12 +40,18 @@ const Index = () => {
   };
 
   const loadCounts = async () => {
-    const { data } = await supabase.from("saves").select("game_id");
-    const map: Record<string, number> = {};
-    (data ?? []).forEach((row: { game_id: string }) => {
-      map[row.game_id] = (map[row.game_id] ?? 0) + 1;
+    const { data } = await supabase
+      .from("saves")
+      .select("game_id, device_id, created_at")
+      .order("created_at", { ascending: false });
+    const countMap: Record<string, number> = {};
+    const latestMap: Record<string, string | null> = {};
+    (data ?? []).forEach((row: { game_id: string; device_id: string | null }) => {
+      countMap[row.game_id] = (countMap[row.game_id] ?? 0) + 1;
+      if (!(row.game_id in latestMap)) latestMap[row.game_id] = row.device_id;
     });
-    setCounts(map);
+    setCounts(countMap);
+    setLatestByGame(latestMap);
   };
 
   useEffect(() => {
@@ -53,6 +64,12 @@ const Index = () => {
     () => games.find((g) => g.id === selectedId) ?? null,
     [games, selectedId],
   );
+
+  const deviceById = useMemo(() => {
+    const m: Record<string, Device> = {};
+    devices.forEach((d) => (m[d.id] = d));
+    return m;
+  }, [devices]);
 
   const removeGame = async () => {
     if (!selected) return;
@@ -97,15 +114,23 @@ const Index = () => {
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
-                {games.map((g) => (
-                  <GameCard
-                    key={g.id}
-                    game={g}
-                    saveCount={counts[g.id] ?? 0}
-                    selected={selectedId === g.id}
-                    onClick={() => setSelectedId(g.id === selectedId ? null : g.id)}
-                  />
-                ))}
+                {games.map((g) => {
+                  const latestDeviceId = latestByGame[g.id];
+                  const latestDevice = latestDeviceId ? deviceById[latestDeviceId] : null;
+                  return (
+                    <GameCard
+                      key={g.id}
+                      game={g}
+                      saveCount={counts[g.id] ?? 0}
+                      latestDeviceName={latestDevice?.name ?? null}
+                      latestIsCurrent={
+                        !!currentDevice && latestDeviceId === currentDevice.id
+                      }
+                      selected={selectedId === g.id}
+                      onClick={() => setSelectedId(g.id === selectedId ? null : g.id)}
+                    />
+                  );
+                })}
               </div>
             )}
 
@@ -118,6 +143,7 @@ const Index = () => {
                 <VersionHistoryPanel
                   game={selected}
                   devices={devices}
+                  currentDeviceId={currentDevice?.id ?? null}
                   onClose={() => setSelectedId(null)}
                   onSavesChange={loadCounts}
                 />
@@ -143,6 +169,16 @@ const Index = () => {
           </div>
         </div>
       </main>
+
+      <RegisterDeviceDialog
+        open={needsRegistration}
+        onOpenChange={(o) => !o && dismiss()}
+        onRegister={async (n, o) => {
+          await register(n, o);
+          loadDevices();
+        }}
+        onSkip={dismiss}
+      />
     </div>
   );
 };
