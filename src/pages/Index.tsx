@@ -10,6 +10,7 @@ import { DevicesPanel } from "@/components/DevicesPanel";
 import { Button } from "@/components/ui/button";
 import { useCurrentDevice } from "@/hooks/useCurrentDevice";
 import { RegisterDeviceDialog } from "@/components/RegisterDeviceDialog";
+import { useSyncthing } from "@/hooks/useSyncthing";
 
 type Game = Tables<"games">;
 type Device = Tables<"devices">;
@@ -22,6 +23,7 @@ const Index = () => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const { device: currentDevice, needsRegistration, register, dismiss } =
     useCurrentDevice();
+  const { folderById, folders: syncFolders, refresh: refreshSync } = useSyncthing();
 
   const loadGames = async () => {
     const { data } = await supabase
@@ -117,6 +119,9 @@ const Index = () => {
                 {games.map((g) => {
                   const latestDeviceId = latestByGame[g.id];
                   const latestDevice = latestDeviceId ? deviceById[latestDeviceId] : null;
+                  const sync = g.syncthing_folder_id
+                    ? folderById[g.syncthing_folder_id] ?? null
+                    : null;
                   return (
                     <GameCard
                       key={g.id}
@@ -126,6 +131,7 @@ const Index = () => {
                       latestIsCurrent={
                         !!currentDevice && latestDeviceId === currentDevice.id
                       }
+                      syncStatus={sync}
                       selected={selectedId === g.id}
                       onClick={() => setSelectedId(g.id === selectedId ? null : g.id)}
                     />
@@ -144,6 +150,15 @@ const Index = () => {
                   game={selected}
                   devices={devices}
                   currentDeviceId={currentDevice?.id ?? null}
+                  syncFolders={syncFolders}
+                  onLinkFolder={async (folderId) => {
+                    await supabase
+                      .from("games")
+                      .update({ syncthing_folder_id: folderId })
+                      .eq("id", selected.id);
+                    await loadGames();
+                    await refreshSync();
+                  }}
                   onClose={() => setSelectedId(null)}
                   onSavesChange={loadCounts}
                 />

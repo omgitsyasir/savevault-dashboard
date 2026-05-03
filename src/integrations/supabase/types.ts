@@ -48,6 +48,7 @@ export type Database = {
           platforms: string[] | null
           release_date: string | null
           summary: string | null
+          syncthing_folder_id: string | null
         }
         Insert: {
           cover_url?: string | null
@@ -58,6 +59,7 @@ export type Database = {
           platforms?: string[] | null
           release_date?: string | null
           summary?: string | null
+          syncthing_folder_id?: string | null
         }
         Update: {
           cover_url?: string | null
@@ -68,6 +70,7 @@ export type Database = {
           platforms?: string[] | null
           release_date?: string | null
           summary?: string | null
+          syncthing_folder_id?: string | null
         }
         Relationships: []
       }
