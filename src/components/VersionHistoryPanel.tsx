@@ -20,6 +20,7 @@ type Device = Tables<"devices">;
 interface Props {
   game: Tables<"games"> | null;
   devices: Device[];
+  currentDeviceId?: string | null;
   onClose: () => void;
   onSavesChange: () => void;
 }
@@ -27,11 +28,21 @@ interface Props {
 const fakeHash = () =>
   Array.from({ length: 16 }, () => Math.floor(Math.random() * 16).toString(16)).join("");
 
-export const VersionHistoryPanel = ({ game, devices, onClose, onSavesChange }: Props) => {
+export const VersionHistoryPanel = ({
+  game,
+  devices,
+  currentDeviceId,
+  onClose,
+  onSavesChange,
+}: Props) => {
   const [saves, setSaves] = useState<Save[]>([]);
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
   const [deviceId, setDeviceId] = useState<string>("");
+
+  useEffect(() => {
+    if (currentDeviceId) setDeviceId(currentDeviceId);
+  }, [currentDeviceId]);
 
   useEffect(() => {
     if (!game) return;
