@@ -8,35 +8,45 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* SaveVault — Glass Aurora dark theme (single mode) */
+    --background: 232 35% 8%;
+    --foreground: 220 30% 96%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 230 30% 11%;
+    --card-foreground: 220 30% 96%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 230 35% 9%;
+    --popover-foreground: 220 30% 96%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 156 72% 58%;          /* aurora mint */
+    --primary-foreground: 232 40% 8%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 258 80% 76%;        /* aurora violet */
+    --secondary-foreground: 232 40% 8%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 230 25% 16%;
+    --muted-foreground: 220 15% 65%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 218 60% 22%;
+    --accent-foreground: 220 30% 96%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 75% 60%;
+    --destructive-foreground: 220 30% 96%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 230 25% 18%;
+    --input: 230 25% 16%;
+    --ring: 156 72% 58%;
 
-    --radius: 0.5rem;
+    --radius: 0.9rem;
+
+    --aurora-1: 156 72% 58%;
+    --aurora-2: 258 80% 76%;
+    --aurora-3: 210 90% 60%;
+
+    --gradient-aurora: linear-gradient(135deg, hsl(var(--aurora-2) / 0.9), hsl(var(--aurora-1) / 0.9) 60%, hsl(var(--aurora-3) / 0.9));
+    --gradient-glass: linear-gradient(135deg, hsl(230 40% 18% / 0.55), hsl(230 40% 10% / 0.35));
+    --shadow-glow: 0 0 60px hsl(var(--aurora-1) / 0.25);
+    --shadow-elevated: 0 20px 60px -20px hsl(232 60% 4% / 0.7);
 
     --sidebar-background: 0 0% 98%;
 
@@ -100,6 +110,30 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "ss01", "cv11";
+    background-image:
+      radial-gradient(800px circle at 10% -10%, hsl(var(--aurora-2) / 0.18), transparent 60%),
+      radial-gradient(700px circle at 110% 10%, hsl(var(--aurora-1) / 0.14), transparent 55%),
+      radial-gradient(900px circle at 50% 120%, hsl(var(--aurora-3) / 0.12), transparent 60%);
+    background-attachment: fixed;
+  }
+}
+
+@layer components {
+  .glass {
+    background: var(--gradient-glass);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    border: 1px solid hsl(var(--border) / 0.7);
+  }
+  .aurora-text {
+    background: var(--gradient-aurora);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .aurora-ring {
+    box-shadow: var(--shadow-glow);
   }
 }
